@@ -1,0 +1,82 @@
+{
+  "title": "Ex 02",
+  "grafcet": "// 0. SYSTEM READY (No Action)\nS0 *\nS0 -> S1 + S4 : dcy . s_L1 . s_L2\n\n// --- CART 1 (Blue) ---\nS1 \"Move_R1\"\nS1 -> S2 : s_R1\n\nS2 \"Move_L1\"\nS2 -> S3 : s_L1\n\nS3\n\n// --- CART 2 (Red) ---\nS4 \"Move_R2\"\nS4 -> S5 : s_R2\n\nS5 \"Move_L2\"\nS5 -> S6 : s_L2\n\nS6\n\n// --- SYNCHRONIZATION ---\nS3 + S6 -> S0 : =1",
+  "svg": "<svg viewBox=\"0 0 800 600\" style=\"font-family: Segoe UI, Arial, sans-serif; background: #eceff1;\">\n  <defs>\n    <!-- GLASS LAMP GRADIENTS -->\n    <radialGradient id=\"led-off\" cx=\"50%\" cy=\"50%\" r=\"50%\">\n      <stop offset=\"0%\" stop-color=\"#555\"></stop>\n      <stop offset=\"100%\" stop-color=\"#333\"></stop>\n    </radialGradient>\n    <radialGradient id=\"led-green\" cx=\"50%\" cy=\"50%\" r=\"50%\">\n      <stop offset=\"0%\" stop-color=\"#69f0ae\"></stop>\n      <stop offset=\"100%\" stop-color=\"#00c853\"></stop>\n    </radialGradient>\n    <radialGradient id=\"led-blue\" cx=\"50%\" cy=\"50%\" r=\"50%\">\n      <stop offset=\"0%\" stop-color=\"#40c4ff\"></stop>\n      <stop offset=\"100%\" stop-color=\"#0091ea\"></stop>\n    </radialGradient>\n    <radialGradient id=\"led-orange\" cx=\"50%\" cy=\"50%\" r=\"50%\">\n      <stop offset=\"0%\" stop-color=\"#ffab40\"></stop>\n      <stop offset=\"100%\" stop-color=\"#ff6d00\"></stop>\n    </radialGradient>\n    \n    <!-- METALLIC RAILS -->\n    <linearGradient id=\"rail-metal\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#cfd8dc\"></stop>\n      <stop offset=\"50%\" stop-color=\"#ffffff\"></stop>\n      <stop offset=\"100%\" stop-color=\"#b0bec5\"></stop>\n    </linearGradient>\n\n    <!-- SHADOWS -->\n    <filter id=\"soft-shadow\">\n      <feDropShadow dx=\"2\" dy=\"3\" stdDeviation=\"3\" flood-opacity=\"0.3\"></feDropShadow>\n    </filter>\n  </defs>\n\n  <!-- ================= DASHBOARD (HMI) ================= -->\n  <rect width=\"800\" height=\"140\" fill=\"#263238\"></rect>\n  <line x1=\"0\" y1=\"140\" x2=\"800\" y2=\"140\" stroke=\"#000\" stroke-width=\"4\"></line>\n\n  <!-- 1. SYSTEM CONTROL GROUP -->\n  <g transform=\"translate(20, 20)\">\n    <rect width=\"140\" height=\"100\" rx=\"8\" fill=\"#37474f\" stroke=\"#546e7a\" stroke-width=\"2\"></rect>\n    <text x=\"70\" y=\"20\" text-anchor=\"middle\" fill=\"#cfd8dc\" font-weight=\"bold\" font-size=\"11\">SYSTEM</text>\n    \n    <!-- Start Button -->\n    <circle id=\"hmi-btn-dcy\" cx=\"70\" cy=\"60\" r=\"25\" fill=\"#00c853\" stroke=\"#fff\" stroke-width=\"2\" cursor=\"pointer\" onmousedown=\"pressDcy()\"></circle>\n    <text x=\"70\" y=\"65\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"bold\" font-size=\"10\" pointer-events=\"none\">START</text>\n  </g>\n\n  <!-- 2. SENSORS (INPUTS) GROUP -->\n  <g transform=\"translate(180, 20)\">\n    <rect width=\"280\" height=\"100\" rx=\"8\" fill=\"#37474f\" stroke=\"#546e7a\" stroke-width=\"2\"></rect>\n    <text x=\"140\" y=\"20\" text-anchor=\"middle\" fill=\"#cfd8dc\" font-weight=\"bold\" font-size=\"11\">SENSOR INPUTS</text>\n    \n    <!-- Labels -->\n    <text x=\"40\" y=\"40\" fill=\"#b0bec5\" font-size=\"9\" text-anchor=\"middle\">s_L1</text>\n    <text x=\"100\" y=\"40\" fill=\"#b0bec5\" font-size=\"9\" text-anchor=\"middle\">s_R1</text>\n    <line x1=\"140\" y1=\"30\" x2=\"140\" y2=\"90\" stroke=\"#546e7a\"></line>\n    <text x=\"180\" y=\"40\" fill=\"#b0bec5\" font-size=\"9\" text-anchor=\"middle\">s_L2</text>\n    <text x=\"240\" y=\"40\" fill=\"#b0bec5\" font-size=\"9\" text-anchor=\"middle\">s_R2</text>\n\n    <!-- Lamps -->\n    <circle id=\"lamp-s_L1\" cx=\"40\" cy=\"65\" r=\"12\" fill=\"url(#led-green)\" stroke=\"#222\"></circle>\n    <circle id=\"lamp-s_R1\" cx=\"100\" cy=\"65\" r=\"12\" fill=\"url(#led-off)\" stroke=\"#222\"></circle>\n    <circle id=\"lamp-s_L2\" cx=\"180\" cy=\"65\" r=\"12\" fill=\"url(#led-green)\" stroke=\"#222\"></circle>\n    <circle id=\"lamp-s_R2\" cx=\"240\" cy=\"65\" r=\"12\" fill=\"url(#led-off)\" stroke=\"#222\"></circle>\n  </g>\n\n  <!-- 3. ACTUATORS (OUTPUTS) GROUP -->\n  <g transform=\"translate(480, 20)\">\n    <rect width=\"280\" height=\"100\" rx=\"8\" fill=\"#37474f\" stroke=\"#546e7a\" stroke-width=\"2\"></rect>\n    <text x=\"140\" y=\"20\" text-anchor=\"middle\" fill=\"#cfd8dc\" font-weight=\"bold\" font-size=\"11\">MOTOR OUTPUTS</text>\n\n    <!-- Labels -->\n    <text x=\"40\" y=\"40\" fill=\"#b0bec5\" font-size=\"9\" text-anchor=\"middle\">← L1</text>\n    <text x=\"100\" y=\"40\" fill=\"#b0bec5\" font-size=\"9\" text-anchor=\"middle\">R1 →</text>\n    <line x1=\"140\" y1=\"30\" x2=\"140\" y2=\"90\" stroke=\"#546e7a\"></line>\n    <text x=\"180\" y=\"40\" fill=\"#b0bec5\" font-size=\"9\" text-anchor=\"middle\">← L2</text>\n    <text x=\"240\" y=\"40\" fill=\"#b0bec5\" font-size=\"9\" text-anchor=\"middle\">R2 →</text>\n\n    <!-- Lamps (Square) -->\n    <rect id=\"lamp-move_L1\" x=\"28\" y=\"53\" width=\"24\" height=\"24\" rx=\"4\" fill=\"url(#led-off)\" stroke=\"#222\"></rect>\n    <rect id=\"lamp-move_R1\" x=\"88\" y=\"53\" width=\"24\" height=\"24\" rx=\"4\" fill=\"url(#led-off)\" stroke=\"#222\"></rect>\n    <rect id=\"lamp-move_L2\" x=\"168\" y=\"53\" width=\"24\" height=\"24\" rx=\"4\" fill=\"url(#led-off)\" stroke=\"#222\"></rect>\n    <rect id=\"lamp-move_R2\" x=\"228\" y=\"53\" width=\"24\" height=\"24\" rx=\"4\" fill=\"url(#led-off)\" stroke=\"#222\"></rect>\n  </g>\n\n  <!-- ================= FIELD VIEW ================= -->\n  \n  <!-- SYSTEM 1 -->\n  <g transform=\"translate(50, 220)\">\n    <text x=\"0\" y=\"-15\" font-weight=\"bold\" fill=\"#0277bd\" font-size=\"18\">SYSTEM 01 (Blue)</text>\n    \n    <!-- Rail -->\n    <rect x=\"0\" y=\"10\" width=\"700\" height=\"15\" rx=\"4\" fill=\"url(#rail-metal)\" stroke=\"#90a4ae\"></rect>\n\n    <!-- PHYSICAL SENSOR: Left 1 -->\n    <g transform=\"translate(30, 28)\">\n       <rect x=\"-10\" y=\"0\" width=\"20\" height=\"25\" fill=\"#ffc107\" stroke=\"#b71c1c\" stroke-width=\"1\"></rect>\n       <circle id=\"field-s_L1\" cx=\"0\" cy=\"12\" r=\"6\" fill=\"#ff3d00\"></circle>\n       <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-5\" stroke=\"#333\" stroke-width=\"2\"></line>\n    </g>\n    <!-- PHYSICAL SENSOR: Right 1 -->\n    <g transform=\"translate(670, 28)\">\n       <rect x=\"-10\" y=\"0\" width=\"20\" height=\"25\" fill=\"#ffc107\" stroke=\"#b71c1c\" stroke-width=\"1\"></rect>\n       <circle id=\"field-s_R1\" cx=\"0\" cy=\"12\" r=\"6\" fill=\"#333\"></circle>\n       <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-5\" stroke=\"#333\" stroke-width=\"2\"></line>\n    </g>\n\n    <!-- CART 1 -->\n    <g id=\"cart1\" transform=\"translate(30, 0)\" filter=\"url(#soft-shadow)\">\n      <rect width=\"80\" height=\"40\" rx=\"8\" fill=\"#039be5\" stroke=\"#01579b\" stroke-width=\"2\"></rect>\n      <rect x=\"5\" y=\"5\" width=\"70\" height=\"30\" rx=\"4\" fill=\"rgba(255,255,255,0.2)\"></rect>\n      <text x=\"40\" y=\"28\" text-anchor=\"middle\" fill=\"white\" font-weight=\"bold\">01</text>\n    </g>\n  </g>\n\n  <!-- SYSTEM 2 -->\n  <g transform=\"translate(50, 420)\">\n    <text x=\"0\" y=\"-15\" font-weight=\"bold\" fill=\"#d84315\" font-size=\"18\">SYSTEM 02 (Red)</text>\n    \n    <!-- Rail -->\n    <rect x=\"0\" y=\"10\" width=\"700\" height=\"15\" rx=\"4\" fill=\"url(#rail-metal)\" stroke=\"#90a4ae\"></rect>\n\n    <!-- PHYSICAL SENSOR: Left 2 -->\n    <g transform=\"translate(30, 28)\">\n       <rect x=\"-10\" y=\"0\" width=\"20\" height=\"25\" fill=\"#ffc107\" stroke=\"#b71c1c\" stroke-width=\"1\"></rect>\n       <circle id=\"field-s_L2\" cx=\"0\" cy=\"12\" r=\"6\" fill=\"#ff3d00\"></circle>\n       <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-5\" stroke=\"#333\" stroke-width=\"2\"></line>\n    </g>\n    <!-- PHYSICAL SENSOR: Right 2 -->\n    <g transform=\"translate(670, 28)\">\n       <rect x=\"-10\" y=\"0\" width=\"20\" height=\"25\" fill=\"#ffc107\" stroke=\"#b71c1c\" stroke-width=\"1\"></rect>\n       <circle id=\"field-s_R2\" cx=\"0\" cy=\"12\" r=\"6\" fill=\"#333\"></circle>\n       <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-5\" stroke=\"#333\" stroke-width=\"2\"></line>\n    </g>\n\n    <!-- CART 2 -->\n    <g id=\"cart2\" transform=\"translate(30.000000000000043, 0)\" filter=\"url(#soft-shadow)\">\n      <rect width=\"80\" height=\"40\" rx=\"8\" fill=\"#f4511e\" stroke=\"#bf360c\" stroke-width=\"2\"></rect>\n      <rect x=\"5\" y=\"5\" width=\"70\" height=\"30\" rx=\"4\" fill=\"rgba(255,255,255,0.2)\"></rect>\n      <text x=\"40\" y=\"28\" text-anchor=\"middle\" fill=\"white\" font-weight=\"bold\">02</text>\n    </g>\n  </g>\n  \n  <!-- STATUS TEXT -->\n  <text id=\"mode-display\" x=\"400\" y=\"580\" text-anchor=\"middle\" font-size=\"14\" fill=\"#546e7a\" font-weight=\"bold\">MODE: CART 1 SLOW / CART 2 FAST</text>\n\n</svg>",
+  "initialState": {
+    "x1": 30,
+    "x2": 30.000000000000043,
+    "v1": 100,
+    "v2": 400,
+    "dcy": false,
+    "locked": false,
+    "mode": "MODE: CART 1 SLOW / CART 2 FAST"
+  },
+  "logic": "// --- 1. HANDLE BUTTON ---\nif(!window.pressDcy) {\n    window.pressDcy = function() {\n        state.dcy = true;\n        setTimeout(() => state.dcy = false, 300);\n    };\n}\n\n// --- 2. CONFIGURATION ---\nconst MIN_X = 30;\nconst MAX_X = 670;\nconst FAST = 400;\nconst SYNC = 200;\nconst SLOW = 100;\n\n// --- 3. SCENARIO RANDOMIZER ---\n// Only randomizes if at start position and DCY is pressed\nconst atHome = state.x1 <= MIN_X + 5 && state.x2 <= MIN_X + 5;\n\nif (state.dcy && atHome && !state.locked) {\n    state.locked = true;\n    const r = Math.random();\n    if (r < 0.33) {\n        state.v1 = FAST; state.v2 = SLOW;\n        state.mode = \"MODE: CART 1 FAST / CART 2 SLOW\";\n    } else if (r < 0.66) {\n        state.v1 = SYNC; state.v2 = SYNC;\n        state.mode = \"MODE: SYNCHRONIZED\";\n    } else {\n        state.v1 = SLOW; state.v2 = FAST;\n        state.mode = \"MODE: CART 1 SLOW / CART 2 FAST\";\n    }\n}\nif (!state.dcy) state.locked = false;\n\n// --- 4. PHYSICS ---\n// Movement based on Active Steps inputs\nif (inputs.Move_R1) state.x1 += state.v1 * dt;\nif (inputs.Move_L1) state.x1 -= state.v1 * dt;\n\nif (inputs.Move_R2) state.x2 += state.v2 * dt;\nif (inputs.Move_L2) state.x2 -= state.v2 * dt;\n\n// Clamping\nstate.x1 = Math.max(MIN_X, Math.min(MAX_X, state.x1));\nstate.x2 = Math.max(MIN_X, Math.min(MAX_X, state.x2));\n\n// --- 5. CALCULATE SENSORS ---\nconst s_L1 = state.x1 <= MIN_X + 5;\nconst s_R1 = state.x1 >= MAX_X - 5;\nconst s_L2 = state.x2 <= MIN_X + 5;\nconst s_R2 = state.x2 >= MAX_X - 5;\n\n// --- 6. UPDATE VISUALS ---\n\n// A. Move Carts\nsvg.querySelector('#cart1').setAttribute('transform', `translate(${state.x1}, 0)`);\nsvg.querySelector('#cart2').setAttribute('transform', `translate(${state.x2}, 0)`);\nsvg.querySelector('#mode-display').textContent = state.mode;\n\n// B. LED Logic Helper\nconst setLamp = (id, active, type) => {\n    let color = 'url(#led-off)';\n    if (active) {\n        if (type === 'green') color = 'url(#led-green)';\n        if (type === 'blue') color = 'url(#led-blue)';\n        if (type === 'orange') color = 'url(#led-orange)';\n    }\n    svg.querySelector(id).setAttribute('fill', color);\n};\n\n// C. Dashboard LEDs (HMI) - Inputs (Green)\nsetLamp('#lamp-s_L1', s_L1, 'green');\nsetLamp('#lamp-s_R1', s_R1, 'green');\nsetLamp('#lamp-s_L2', s_L2, 'green');\nsetLamp('#lamp-s_R2', s_R2, 'green');\n\n// D. Dashboard LEDs (HMI) - Actions (Blue)\nsetLamp('#lamp-move_L1', inputs.Move_L1, 'blue');\nsetLamp('#lamp-move_R1', inputs.Move_R1, 'blue');\nsetLamp('#lamp-move_L2', inputs.Move_L2, 'blue');\nsetLamp('#lamp-move_R2', inputs.Move_R2, 'blue');\n\n// E. Start Button Effect\nsvg.querySelector('#hmi-btn-dcy').setAttribute('fill', state.dcy ? '#b9f6ca' : '#00c853');\n\n// F. FIELD SENSORS (On the track) - Light up RED/ORANGE when active\nconst fieldOn = '#ff3d00'; \nconst fieldOff = '#333';\n\nsvg.querySelector('#field-s_L1').setAttribute('fill', s_L1 ? fieldOn : fieldOff);\nsvg.querySelector('#field-s_R1').setAttribute('fill', s_R1 ? fieldOn : fieldOff);\nsvg.querySelector('#field-s_L2').setAttribute('fill', s_L2 ? fieldOn : fieldOff);\nsvg.querySelector('#field-s_R2').setAttribute('fill', s_R2 ? fieldOn : fieldOff);\n\n// --- RETURN INPUTS ---\nreturn {\n    dcy: state.dcy,\n    s_L1: s_L1,\n    s_R1: s_R1,\n    s_L2: s_L2,\n    s_R2: s_R2,\n    '=1': true\n};",
+  "layout": {
+    "nodes": {
+      "S0": {
+        "x": 75.14285278320312,
+        "y": 61.28571319580078
+      },
+      "S1": {
+        "x": -24.285715103149414,
+        "y": 199.99998474121094
+      },
+      "S2": {
+        "x": -23.928571701049805,
+        "y": 317.1428527832031
+      },
+      "S3": {
+        "x": -25.35714340209961,
+        "y": 422.8571472167969
+      },
+      "S4": {
+        "x": 114.28571319580078,
+        "y": 200
+      },
+      "S5": {
+        "x": 115.11904907226562,
+        "y": 320
+      },
+      "S6": {
+        "x": 115.47618865966797,
+        "y": 422.3809509277344
+      },
+      "T_0": {
+        "x": 75,
+        "y": 110
+      },
+      "hub_s_1": {
+        "x": 75,
+        "y": 152.1428680419922
+      },
+      "T_2": {
+        "x": -24.5238094329834,
+        "y": 255.71426391601562
+      },
+      "T_3": {
+        "x": -24.5238094329834,
+        "y": 370
+      },
+      "T_4": {
+        "x": 114.5238037109375,
+        "y": 255.71429443359375
+      },
+      "T_5": {
+        "x": 115.35714721679688,
+        "y": 374.88092041015625
+      },
+      "T_6": {
+        "x": 28.33333396911621,
+        "y": 513.3333740234375
+      },
+      "hub_j_7": {
+        "x": 60,
+        "y": 473.3333435058594
+      }
+    },
+    "loops": {
+      "T_6-S0": 210
+    }
+  }
+}

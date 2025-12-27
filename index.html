@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Systems Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="viewer-mode">
+
+<header class="top-nav">
+    <div class="logo">PLC Visualizer</div>
+    
+    <div class="controls-group">
+        <label for="system-select">Select System:</label>
+        <select id="system-select" onchange="loadSelectedSystem()">
+            <option value="car.json">01. Simple AGV Cart</option>
+            <option value="twoCar.json">02. Two Synchronized Carts</option>
+            <option value="bottle.json">03. Filling & Capping Line</option>
+            <option value="mix.json">04. Tank Mixing System</option>
+            <option value="split.json">05. Sorting Conveyor</option>
+        </select>
+    </div>  
+
+
+</header>
+
+<main id="main-viewer">
+    <!-- GRAFCET VIEW -->
+    <section id="grafcet-panel">
+        <div class="panel-label">GRAFCET LOGIC</div>
+        <div id="canvas-container" onwheel="onScroll(event)" onmousedown="onPanStart(event)">
+            <svg id="svg"><g id="scene"></g></svg>
+        </div>
+    </section>
+
+    <!-- DIGITAL TWIN VIEW -->
+    <section id="system-panel">
+        <div class="panel-label">SIMULATION</div>
+        <div id="twin-container">
+            <!-- SVG Animation injected here -->
+        </div>
+    </section>
+</main>
+
+<!-- Hidden Textarea (Logic still reads from here, but user doesn't see it) -->
+<textarea id="code" style="display:none;"></textarea>
+
+<!-- Scripts -->
+<script src="core.js"></script>
+<script src="drawing.js"></script>
+<script src="simulation.js"></script>
+<script src="interaction.js"></script>
+<script src="drawing-primitives.js"></script>
+<script src="twin.js"></script>
+
+<script>
+    // Logic to fetch and load JSON files
+    async function loadSelectedSystem() {
+        const file = document.getElementById('system-select').value;
+        try {
+            const response = await fetch(file);
+            const data = await response.json();
+            
+            // 1. Set the code in the hidden textarea so core.js can render it
+            document.getElementById('code').value = data.grafcet;
+            
+            // 2. Use the existing loader from twin.js
+            loadSystem(JSON.stringify(data));
+            
+            // 3. Reset Simulation state
+            resetSim();
+            
+            // 4. Auto-center the Grafcet view
+            setTimeout(() => {
+                resetView();
+                startSim(); // Auto-start the simulation
+            }, 100);
+            
+        } catch (error) {
+            console.error("Error loading system:", error);
+        }
+    }
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', loadSelectedSystem);
+</script>
+</body>
+</html>

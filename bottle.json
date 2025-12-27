@@ -1,0 +1,107 @@
+{
+  "title": "Ex03",
+  "grafcet": "// 1. Initial State\nS1 * \nS1 -> S2 : ci . cs\n\n// 2. Advance Conveyor\nS2 \"MF\"\nS2 -> S3 + S6 : md\n\n// --- STATION 1: FILLING ---\nS3 \nS3 -> S5 : nbf\nS3 -> S4 : bf\n\nS4 \"V\"\nS4 -> S5 : fd\n\nS5 \n\n// --- STATION 2: CAPPING ---\nS6 \nS6 -> S8 : nbc\nS6 -> S7 : bc\n\nS7 \"C\"\nS7 -> S8 : cd\n\nS8 \n\n// --- MERGE ---\nS5 + S8 -> S1 : =1",
+  "svg": "<svg viewBox=\"0 0 600 400\" style=\"background:#f4f4f4; border: 2px solid #333; font-family: Arial, sans-serif;\"> \n  <defs> \n    <!-- Orange Liquid -->\n    <linearGradient id=\"liquid-orange\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"> \n      <stop offset=\"0%\" stop-color=\"#ffb74d\"></stop> \n      <stop offset=\"100%\" stop-color=\"#ef6c00\"></stop> \n    </linearGradient> \n    <!-- Metal Texture -->\n    <linearGradient id=\"metal\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"> \n      <stop offset=\"0%\" stop-color=\"#90a4ae\"></stop> \n      <stop offset=\"50%\" stop-color=\"#cfd8dc\"></stop> \n      <stop offset=\"100%\" stop-color=\"#90a4ae\"></stop> \n    </linearGradient>\n    <filter id=\"shadow\"> <feDropShadow dx=\"1\" dy=\"1\" stdDeviation=\"1\" opacity=\"0.3\"></feDropShadow> </filter>\n  </defs> \n\n  <!-- BACKGROUND GRID -->\n  <pattern id=\"grid\" width=\"20\" height=\"20\" patternUnits=\"userSpaceOnUse\">\n     <path d=\"M 20 0 L 0 0 0 20\" fill=\"none\" stroke=\"#e0e0e0\" stroke-width=\"1\"></path>\n  </pattern>\n  <rect width=\"100%\" height=\"100%\" fill=\"url(#grid)\"></rect>\n\n  <!-- CONVEYOR BELT -->\n  <g transform=\"translate(0, 250)\">\n     <rect x=\"0\" y=\"0\" width=\"600\" height=\"40\" fill=\"#37474f\"></rect>\n     <!-- Rollers -->\n     <line id=\"belt-line\" x1=\"0\" y1=\"2\" x2=\"600\" y2=\"2\" stroke=\"#b0bec5\" stroke-width=\"4\" stroke-dasharray=\"10,10\" stroke-dashoffset=\"0\"></line>\n     <line x1=\"0\" y1=\"38\" x2=\"600\" y2=\"38\" stroke=\"#546e7a\" stroke-width=\"2\"></line>\n  </g>\n\n  <!-- STATION 1: FILLER (X=150) -->\n  <g transform=\"translate(150, 40)\">\n    <!-- Tank (Orange) -->\n    <rect x=\"-30\" y=\"0\" width=\"60\" height=\"90\" rx=\"5\" fill=\"rgba(255,255,255,0.9)\" stroke=\"#555\" stroke-width=\"2\"></rect>\n    <rect x=\"-25\" y=\"10\" width=\"50\" height=\"70\" fill=\"url(#liquid-orange)\" opacity=\"0.9\"></rect>\n    <text x=\"0\" y=\"50\" fill=\"white\" font-size=\"10\" text-anchor=\"middle\" font-weight=\"bold\">JUICE</text>\n    \n    <!-- Nozzle (Longer to reach bottle) -->\n    <rect x=\"-4\" y=\"90\" width=\"8\" height=\"40\" fill=\"#555\"></rect>\n    <path d=\"M -8,130 L 8,130 L 0,140 Z\" fill=\"#333\"></path>\n    \n    <!-- Flow Stream (Reaches bottom y=250 global. Station y=40. Nozzle Tip y=140 local (180 global). Bottom=250. Diff=70) -->\n    <rect id=\"fill-flow\" x=\"-2\" y=\"140\" width=\"4\" height=\"0\" fill=\"#ef6c00\" opacity=\"0.8\"></rect>\n  </g>\n\n  <!-- STATION 2: CAPPER (Fixed Alignment X=350) -->\n  <!-- Calculation: StartX(50) + Index(3)*Spacing(100) = 350 -->\n  <g transform=\"translate(350, 40)\">\n    <!-- Housing -->\n    <rect x=\"-20\" y=\"0\" width=\"40\" height=\"80\" fill=\"url(#metal)\" stroke=\"#455a64\"></rect>\n    <text x=\"0\" y=\"20\" fill=\"#333\" font-size=\"9\" text-anchor=\"middle\" font-weight=\"bold\">CAPPER</text>\n    \n    <!-- Piston & Head -->\n    <g id=\"capper-assembly\">\n        <rect x=\"-4\" y=\"80\" width=\"8\" height=\"0\" id=\"piston-rod\" fill=\"#333\"></rect>\n        <!-- Head starts higher (local y=80 -> global 120. Bottle Top global = 250-80 = 170. Gap = 50) -->\n        <g id=\"capper-head\" transform=\"translate(0, 80)\">\n            <rect x=\"-15\" y=\"0\" width=\"30\" height=\"15\" rx=\"2\" fill=\"#d32f2f\" stroke=\"#b71c1c\"></rect>\n            <rect x=\"-18\" y=\"12\" width=\"36\" height=\"4\" fill=\"#333\"></rect>\n        </g>\n    </g>\n  </g>\n\n  <!-- BOTTLES CONTAINER -->\n  <g id=\"bottles-group\"><g transform=\"translate(50,250)\"><path d=\"M -15,-60 L -15,0 L 15,0 L 15,-60 L 10,-80 L -10,-80 Z\" fill=\"rgba(255,255,255, 0.5)\" stroke=\"#78909c\" stroke-width=\"1.5\"></path></g></g>\n\n  <!-- HMI DASHBOARD (White Theme) -->\n  <g transform=\"translate(150, 310)\">\n    <rect x=\"0\" y=\"0\" width=\"300\" height=\"80\" rx=\"8\" fill=\"#ffffff\" stroke=\"#ccc\" stroke-width=\"2\" filter=\"url(#shadow)\"></rect>\n    <text x=\"150\" y=\"18\" fill=\"#555\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">PRODUCTION STATISTICS</text>\n    <line x1=\"10\" y1=\"25\" x2=\"290\" y2=\"25\" stroke=\"#eee\" stroke-width=\"2\"></line>\n\n    <!-- Status -->\n    <g transform=\"translate(20, 45)\">\n        <circle cx=\"10\" cy=\"10\" r=\"6\" fill=\"#00e676\" id=\"status-light\"></circle>\n        <text x=\"25\" y=\"14\" fill=\"#333\" font-size=\"10\">RUNNING</text>\n    </g>\n\n    <!-- Counter 1: Filled -->\n    <g transform=\"translate(110, 35)\">\n       <text x=\"0\" y=\"0\" fill=\"#777\" font-size=\"8\">FILLED</text>\n       <rect x=\"0\" y=\"5\" width=\"70\" height=\"25\" fill=\"#fff3e0\" stroke=\"#ffb74d\"></rect>\n       <text id=\"lcd-filled\" x=\"65\" y=\"22\" fill=\"#e65100\" font-family=\"monospace\" font-weight=\"bold\" font-size=\"16\" text-anchor=\"end\">000</text>\n    </g>\n\n    <!-- Counter 2: Capped -->\n    <g transform=\"translate(200, 35)\">\n       <text x=\"0\" y=\"0\" fill=\"#777\" font-size=\"8\">CAPPED</text>\n       <rect x=\"0\" y=\"5\" width=\"70\" height=\"25\" fill=\"#ffebee\" stroke=\"#e57373\"></rect>\n       <text id=\"lcd-capped\" x=\"65\" y=\"22\" fill=\"#c62828\" font-family=\"monospace\" font-weight=\"bold\" font-size=\"16\" text-anchor=\"end\">000</text>\n    </g>\n  </g>\n\n</svg>",
+  "initialState": {
+    "offset": 0,
+    "bottles": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "filling": 0,
+    "capping": 0,
+    "moveDone": false,
+    "auto": true,
+    "countFill": 0,
+    "countCap": 0,
+    "beltAnim": 0
+  },
+  "logic": "// --- CONSTANTS ---\nconst SPEED_AP = 120; \nconst SPEED_FILL = 80;\nconst SPEED_CAP = 100;\nconst BOTTLE_SPACING = 100;\nconst START_X = 50;\n\n// --- 1. CONVEYOR LOGIC ---\nif (inputs.MF) {\n    state.offset += SPEED_AP * dt;\n    state.beltAnim -= SPEED_AP * dt;\n    \n    if (state.offset >= BOTTLE_SPACING) {\n        state.offset = BOTTLE_SPACING;\n        state.moveDone = true;\n    }\n} else {\n    if (state.moveDone) {\n        state.bottles.pop();\n        const newBottle = Math.random() > 0.5 ? 1 : 0;\n        state.bottles.unshift(newBottle);\n        state.offset = 0;\n        state.moveDone = false;\n    }\n}\n\n// --- 2. FILLING STATION ---\nconst bottleAtFill = state.bottles[1]; \n\nif (inputs.V && (bottleAtFill === 1 || bottleAtFill === 2)) {\n    state.filling += SPEED_FILL * dt;\n    if (state.filling >= 100) {\n        state.filling = 100;\n        if(state.bottles[1] === 1) {\n            state.bottles[1] = 2; \n            state.countFill++;\n        }\n    }\n} else {\n    state.filling = 0;\n}\n\n// --- 3. CAPPING STATION ---\nconst bottleAtCap = state.bottles[3];\n\nif (inputs.C && (bottleAtCap === 2 || bottleAtCap === 3)) {\n    state.capping += SPEED_CAP * dt;\n    if (state.capping >= 100) {\n        state.capping = 100;\n        if(state.bottles[3] === 2) {\n            state.bottles[3] = 3; \n            state.countCap++;\n        }\n    }\n} else {\n    state.capping -= SPEED_CAP * dt;\n    if(state.capping < 0) state.capping = 0;\n}\n\n// --- 4. RENDER BOTTLES ---\nconst grp = svg.querySelector('#bottles-group');\ngrp.innerHTML = '';\nstate.bottles.forEach((bType, index) => {\n    if (bType === 0) return;\n    \n    // Positions\n    const bx = START_X + (index * BOTTLE_SPACING) + state.offset;\n    const by = 250;\n    \n    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');\n    g.setAttribute('transform', `translate(${bx},${by})`);\n    \n    // Bottle Body (Glass effect)\n    const b = document.createElementNS('http://www.w3.org/2000/svg', 'path');\n    b.setAttribute('d', 'M -15,-60 L -15,0 L 15,0 L 15,-60 L 10,-80 L -10,-80 Z');\n    b.setAttribute('fill', 'rgba(255,255,255, 0.5)');\n    b.setAttribute('stroke', '#78909c');\n    b.setAttribute('stroke-width', '1.5');\n    g.appendChild(b);\n    \n    // Orange Liquid\n    if (bType >= 2) {\n        const l = document.createElementNS('http://www.w3.org/2000/svg', 'path');\n        let pct = 1.0;\n        if(index === 1 && inputs.V && state.filling < 100) pct = state.filling/100;\n        \n        const h = 55 * pct;\n        // Draw path for liquid inside bottle shape\n        l.setAttribute('d', `M -14,${-h} L 14,${-h} L 14,0 L -14,0 Z`);\n        l.setAttribute('fill', 'url(#liquid-orange)');\n        g.appendChild(l);\n    }\n    \n    // Red Cap\n    if (bType === 3) {\n        const c = document.createElementNS('http://www.w3.org/2000/svg', 'rect');\n        c.setAttribute('x', -11); c.setAttribute('y', -86);\n        c.setAttribute('width', 22); c.setAttribute('height', 8);\n        c.setAttribute('rx', 2);\n        c.setAttribute('fill', '#d32f2f');\n        c.setAttribute('stroke', '#b71c1c');\n        g.appendChild(c);\n    }\n    \n    grp.appendChild(g);\n});\n\n// --- 5. RENDER STATION ANIMATIONS ---\n// Belt\nsvg.querySelector('#belt-line').setAttribute('stroke-dashoffset', state.beltAnim);\n\n// Flow Stream (Reaches bottom)\nconst flow = svg.querySelector('#fill-flow');\nif(inputs.V && state.filling < 100 && state.bottles[1]===1) {\n    // Height calculation: \n    // Nozzle tip is at Y=140 (local), Y=180 (global). \n    // Bottle bottom is Y=250 (global). \n    // Total distance = 70px. \n    // But liquid rises, so flow should technically shorten, but simplest visual is static flow to bottom.\n    flow.setAttribute('height', 70); \n} else { \n    flow.setAttribute('height', 0); \n}\n\n// Capper Piston\nconst rod = svg.querySelector('#piston-rod');\nconst head = svg.querySelector('#capper-head');\n// Travel: Start Y=80 (local). Bottle Top Y local is (250-80 - 40) = 130. \n// Wait, Station Y=40. Bottle Top Y=170. \n// Head Start Y=80+40 = 120. Gap = 50px.\nconst maxTravel = 48; // Stop just at the top\nconst yOff = (state.capping / 100) * maxTravel;\nrod.setAttribute('height', yOff);\nhead.setAttribute('transform', `translate(0, ${80 + yOff})`);\n\n// --- 6. HMI UPDATE ---\nsvg.querySelector('#lcd-filled').textContent = state.countFill.toString().padStart(3,'0');\nsvg.querySelector('#lcd-capped').textContent = state.countCap.toString().padStart(3,'0');\n\n// --- 7. SENSOR OUTPUTS ---\nconst isBottleAtFill = state.bottles[1] !== 0;\nconst isBottleAtCap = state.bottles[3] !== 0;\n\nreturn {\n    ci: true,\n    cs: true,\n    md: state.moveDone,\n    bf: isBottleAtFill,\n    nbf: !isBottleAtFill,\n    fd: state.filling >= 100,\n    bc: isBottleAtCap,\n    nbc: !isBottleAtCap,\n    cd: state.capping >= 100,\n    '=1': true\n};",
+  "layout": {
+    "nodes": {
+      "S1": {
+        "x": 158.78204345703125,
+        "y": 65.80129051208496
+      },
+      "S2": {
+        "x": 158.92857360839844,
+        "y": 159.23077392578125
+      },
+      "S3": {
+        "x": 80.38461685180664,
+        "y": 291.5384521484375
+      },
+      "S4": {
+        "x": 80.76923370361328,
+        "y": 400
+      },
+      "S5": {
+        "x": 81.474365234375,
+        "y": 529.679443359375
+      },
+      "S6": {
+        "x": 239.61538696289062,
+        "y": 294.6153869628906
+      },
+      "S7": {
+        "x": 239.899658203125,
+        "y": 401.4715270996094
+      },
+      "S8": {
+        "x": 240.6501922607422,
+        "y": 525.0274658203125
+      },
+      "T_0": {
+        "x": 159.10714721679688,
+        "y": 113.39285278320312
+      },
+      "T_1": {
+        "x": 158.92857360839844,
+        "y": 209.18832397460938
+      },
+      "hub_s_2": {
+        "x": 191.36363220214844,
+        "y": 241.81817626953125
+      },
+      "T_3": {
+        "x": 3.269228935241699,
+        "y": 415.576904296875
+      },
+      "T_4": {
+        "x": 80.76922607421875,
+        "y": 355.3846130371094
+      },
+      "T_5": {
+        "x": 80.76923370361328,
+        "y": 449.23077392578125
+      },
+      "T_6": {
+        "x": 333.7820739746094,
+        "y": 446.9871826171875
+      },
+      "T_7": {
+        "x": 239.99998474121094,
+        "y": 354.6153564453125
+      },
+      "T_8": {
+        "x": 240.11904907226562,
+        "y": 448.470703125
+      },
+      "T_9": {
+        "x": 163.75,
+        "y": 640.25
+      },
+      "hub_j_10": {
+        "x": 195.8333282470703,
+        "y": 604.1666870117188
+      }
+    },
+    "loops": {
+      "T_9-S1": 220.28573608398438
+    }
+  }
+}
