@@ -41,6 +41,8 @@
         </div>
         <!-- Floating Zoom Controls -->
         <div class="zoom-controls-floating">
+            <button class="btn-zoom" onclick="resetLayout()" title="Reset Layout">⟲</button>
+            <div style="height:5px"></div> <!-- Spacer -->
             <button class="btn-zoom" onclick="zoom(0.2)">+</button>
             <button class="btn-zoom" onclick="zoom(-0.2)">-</button>
         </div>
@@ -187,25 +189,41 @@
     }
 
     // Image Zoom Logic
-    let zoomedImg = null;
+    // Strategy: Clone image into overlay to avoid messing with document flow
+    const overlay = document.getElementById('img-zoom-overlay');
+    let activeZoomImg = null;
+
     function handleImgClick(e) {
         if (e.target.tagName === 'IMG') {
-            if (e.target.classList.contains('img-zoomed')) {
-                closeImgZoom();
-            } else {
-                zoomedImg = e.target;
-                zoomedImg.classList.add('img-zoomed');
-                document.getElementById('img-zoom-overlay').classList.add('active');
-            }
+            const src = e.target.src;
+            overlay.innerHTML = ''; // Clear previous
+            
+            // Create a fresh image for the lightbox
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'img-zoomed';
+            img.onclick = closeImgZoom; // Click img to close
+            
+            overlay.appendChild(img);
+            overlay.classList.add('active');
+            activeZoomImg = img;
         }
     }
 
     function closeImgZoom() {
-        if (zoomedImg) {
-            zoomedImg.classList.remove('img-zoomed');
-            zoomedImg = null;
+        overlay.classList.remove('active');
+        setTimeout(() => {
+            overlay.innerHTML = ''; // Cleanup
+            activeZoomImg = null;
+        }, 200);
+    }
+
+    // Reset Layout: Force clear and reload
+    function resetLayout() {
+        // Delegate to twin.js which has access to the dirty-free initialData
+        if(window.restoreOriginalLayout) {
+            window.restoreOriginalLayout();
         }
-        document.getElementById('img-zoom-overlay').classList.remove('active');
     }
 
     function closeInfo() {

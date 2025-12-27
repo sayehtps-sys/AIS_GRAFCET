@@ -146,6 +146,29 @@ window.loadSystemFromData = function(data) {
     }
 };
 
+// --- NEW: Restore Original Auto-Layout ---
+window.restoreOriginalLayout = function() {
+    if (!initialData) return;
+    
+    // 1. Deep clone the original data
+    const cleanData = JSON.parse(JSON.stringify(initialData));
+    
+    // 2. DO NOT delete layout. We want the "JSON Default", not "Auto Default".
+    // if (cleanData.layout) delete cleanData.layout; 
+    
+    // 3. Force Clear Core Cache (Removes manual drags)
+    if(window.clearLayout) window.clearLayout();
+    
+    // 4. Reload (This will re-apply cleanData.layout if it exists)
+    loadSystem(JSON.stringify(cleanData));
+    
+    // 5. Center
+    setTimeout(() => {
+        if(window.resetView) window.resetView();
+    }, 50);
+    console.log("Original JSON Layout Restored");
+};
+
 
 window.loadSystemFromData = function(data) {
     if (data.svg) {

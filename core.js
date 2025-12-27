@@ -5,6 +5,14 @@ let loopOffsets = {};
 let view = { x: 50, y: 50, scale: 1 };
 let importedLayout = null; // NEW: Holds saved layout data
 
+// Expose reset function to clearing global state
+window.clearLayout = function() {
+    importedLayout = null;
+    nodePos = {};
+    loopOffsets = {};
+    console.log("Layout Cache Cleared");
+};
+
 // Animation State
 let simInterval = null;
 let activeTokens = new Set(); // Set of active Step IDs

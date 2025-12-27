@@ -434,45 +434,105 @@ svg { width: 100%; height: 100%; display: block; }
 }
 .btn-zoom:active { transform: scale(0.95); }
 
-/* Image Zooming */
+/* Image Zooming (Lightbox Style - Flexbox Method for Sharpness) */
 .modal-body img {
-    /* Smaller default size */
     width: 80%;
     max-width: 400px;
     margin: 10px auto; 
     display: block;
     cursor: zoom-in;
-    transition: transform 0.3s;
+    transition: transform 0.2s;
+    image-rendering: -webkit-optimize-contrast; /* Try to keep it crisp */
 }
 
+/* The Zoomed Image itself */
 .img-zoomed {
-    /* Full Screen Overlay */
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(1.5);
+    /* No transforms! This fixes the blur. */
+    /* Positioning is handled by the flex-parent (.img-zoom-overlay) */
+    position: relative; 
     width: auto;
-    max-width: 90vw;
-    max-height: 90vh;
-    z-index: 200;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-    border: 4px solid white;
+    height: auto;
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    
+    z-index: 1001; /* Above overlay */
     cursor: zoom-out !important;
+    
+    border: 2px solid white;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    border-radius: 4px;
+    background: white; 
 }
-/* Overlay background when zoomed */
+
+/* Darker Overlay - Becomes the Flex Container */
 .img-zoom-overlay {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8);
-    z-index: 199;
+    background: rgba(0,0,0,0.9);
+    z-index: 1000;
+    
+    /* Flexbox Centering */
     display: none;
+    justify-content: center;
+    align-items: center;
+    
+    backdrop-filter: blur(5px);
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.2s;
 }
 .img-zoom-overlay.active {
-    display: block;
+    display: flex; /* Critical change from block to flex */
     opacity: 1;
+}
+
+/* --- Mobile Modal Fix ("Show Solution" Visibility) --- */
+.modal-content {
+    background: white;
+    border: none;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    width: 95%;
+    max-width: 720px;
+    color: var(--text-main);
+    
+    /* Flex Layout for Sticky Footer */
+    display: flex;
+    flex-direction: column;
+    /* Important: Limit height and respect viewport */
+    max-height: 90vh; /* Leave some breathing room */
+    height: auto;
+}
+
+.modal-header {
+    flex-shrink: 0; /* Keep header fixed size */
+    background: white;
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+}
+
+.modal-body {
+    flex: 1; /* Take remaining space */
+    overflow-y: auto; /* Scroll ONLY the body */
+    padding: 32px;
+    font-size: 1.05rem; 
+    color: #374151; 
+    line-height: 1.6;
+}
+
+.modal-footer {
+    flex-shrink: 0; /* Keep footer fixed size */
+    padding: 20px 32px;
+    background: #f9fafb;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    border-radius: 0 0 16px 16px;
 }
 
 /* Parallel & Divergence Bars (Missing in previous version) */
