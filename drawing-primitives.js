@@ -63,6 +63,7 @@ function drawLoop(p, src, tgt, key) {
     drawArrowHead(p, xLoop, (yBot+yTop)/2);
     const handle = createEl('line', { x1: xLoop, y1: yBot, x2: xLoop, y2: yTop, class: 'loop-handle', 'data-key': key });
     handle.addEventListener('mousedown', onLoopDragStart);
+    handle.addEventListener('touchstart', onLoopDragStart, {passive: false});
     p.appendChild(handle);
 }
 

@@ -30,7 +30,7 @@
     <!-- GRAFCET VIEW -->
     <section id="grafcet-panel">
         <div class="panel-label">GRAFCET LOGIC</div>
-        <div id="canvas-container" onwheel="onScroll(event)" onmousedown="onPanStart(event)">
+        <div id="canvas-container" onwheel="onScroll(event)" onmousedown="onPanStart(event)" ontouchstart="onPanStart(event)">
             <svg id="svg"><g id="scene"></g></svg>
         </div>
     </section>

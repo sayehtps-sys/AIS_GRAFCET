@@ -20,6 +20,7 @@ function drawScene() {
         });
 
         grp.addEventListener('mousedown', onNodeDragStart);
+        grp.addEventListener('touchstart', onNodeDragStart, {passive: false});
 
         if(n.type === 'step') {
             grp.appendChild(createEl('rect', {x:-20, y:-20, width:40, height:40, class:'box-step'}));
@@ -59,6 +60,7 @@ function drawScene() {
             });
 
             grp.addEventListener('mousedown', onNodeDragStart);
+            grp.addEventListener('touchstart', onNodeDragStart, {passive: false});
 
             // Create an invisible element for the hub to make it draggable
             grp.appendChild(createEl('circle', {

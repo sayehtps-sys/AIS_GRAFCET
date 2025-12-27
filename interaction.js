@@ -1,4 +1,12 @@
 // --- View Logic ---
+// Helper to get coordinates from Mouse or Touch
+function getEvtLoc(evt) {
+    if (evt.touches && evt.touches.length > 0) {
+        return { x: evt.touches[0].clientX, y: evt.touches[0].clientY };
+    }
+    return { x: evt.clientX, y: evt.clientY };
+}
+
 function updateTransform() {
     const scene = document.getElementById('scene');
     scene.setAttribute('transform', `translate(${view.x},${view.y}) scale(${view.scale})`);
@@ -25,51 +33,37 @@ function resetView() {
 
     nodeKeys.forEach(k => {
         const n = nodePos[k];
-        // Approximate node size for bounding box (allow some padding)
-        const w = 60; // Estimated width
-        const h = 60; // Estimated height
+        const w = 60; const h = 60; 
         if (n.x - w/2 < minX) minX = n.x - w/2;
         if (n.x + w/2 > maxX) maxX = n.x + w/2;
         if (n.y - h/2 < minY) minY = n.y - h/2;
         if (n.y + h/2 > maxY) maxY = n.y + h/2;
     });
 
-    // Add extra padding around the graph
     const padding = 50;
-    minX -= padding;
-    minY -= padding;
-    maxX += padding;
-    maxY += padding;
+    minX -= padding; minY -= padding;
+    maxX += padding; maxY += padding;
 
     const graphW = maxX - minX;
     const graphH = maxY - minY;
 
-    // 2. Get Container Dimensions
     const container = document.getElementById('canvas-container');
     const containerW = container.clientWidth || 800;
     const containerH = container.clientHeight || 600;
 
-    // 3. Calculate Scale to Fit
     const scaleX = containerW / graphW;
     const scaleY = containerH / graphH;
     let newScale = Math.min(scaleX, scaleY);
 
-    // Limit scale
     if (newScale > 1.5) newScale = 1.5; 
     if (newScale < 0.2) newScale = 0.2;
 
-    // 4. Center the View
-    // The graph center in "scene coordinates"
     const cx = minX + graphW / 2;
     const cy = minY + graphH / 2;
-
-    // We want this (cx, cy) to be at the center of the container (containerW/2, containerH/2)
-    // Formula: view.x + cx * view.scale = containerW / 2
-    // So: view.x = (containerW / 2) - (cx * newScale)
     
     view.scale = newScale;
     view.x = (containerW / 2) - (cx * newScale);
-    view.y = (containerH / 2) - (cy * newScale) + 20; // +20 for top padding adjustment
+    view.y = (containerH / 2) - (cy * newScale) + 20;
 
     updateTransform();
 }
@@ -79,8 +73,12 @@ function onScroll(evt) {
     const delta = evt.deltaY < 0 ? 0.1 : -0.1;
     const svg = document.getElementById('svg');
     const rect = svg.getBoundingClientRect();
-    const mx = evt.clientX - rect.left;
-    const my = evt.clientY - rect.top;
+    // Use first touch or mouse
+    const clientX = (evt.touches && evt.touches[0]) ? evt.touches[0].clientX : evt.clientX;
+    const clientY = (evt.touches && evt.touches[0]) ? evt.touches[0].clientY : evt.clientY;
+
+    const mx = clientX - rect.left;
+    const my = clientY - rect.top;
 
     const oldScale = view.scale;
     let newScale = oldScale + delta;
@@ -94,23 +92,35 @@ function onScroll(evt) {
 }
 
 function onPanStart(evt) {
+    // Prevent default to stop scrolling on mobile while panning
+    if(evt.type === 'touchstart') evt.preventDefault();
+    
     if(evt.target.tagName !== 'svg' && evt.target.id !== 'scene') return;
     dragInfo.type = 'pan';
-    dragInfo.startMouse = { x: evt.clientX, y: evt.clientY };
+    dragInfo.startMouse = getEvtLoc(evt);
     dragInfo.startView = { x: view.x, y: view.y };
-    window.addEventListener('mousemove', onGlobalDrag);
-    window.addEventListener('mouseup', onGlobalEnd);
+    
+    if (evt.type === 'touchstart') {
+        window.addEventListener('touchmove', onGlobalDrag, {passive: false});
+        window.addEventListener('touchend', onGlobalEnd);
+    } else {
+        window.addEventListener('mousemove', onGlobalDrag);
+        window.addEventListener('mouseup', onGlobalEnd);
+    }
 }
 
 function getScenePoint(evt) {
     const scene = document.getElementById('scene');
     const pt = document.getElementById('svg').createSVGPoint();
-    pt.x = evt.clientX;
-    pt.y = evt.clientY;
+    const loc = getEvtLoc(evt);
+    pt.x = loc.x;
+    pt.y = loc.y;
     return pt.matrixTransform(scene.getScreenCTM().inverse());
 }
 
 function onNodeDragStart(evt) {
+    if(evt.type === 'touchstart') evt.preventDefault(); // Prevent scroll
+
     const group = evt.currentTarget;
     const nodeId = group.getAttribute('data-id');
     const nodeType = nodePos[nodeId]?.type;
@@ -126,12 +136,20 @@ function onNodeDragStart(evt) {
     const pt = getScenePoint(evt);
     dragInfo.startMouse = pt;
     dragInfo.startObj = { ...nodePos[dragInfo.id] };
-    window.addEventListener('mousemove', onGlobalDrag);
-    window.addEventListener('mouseup', onGlobalEnd);
+    
+    if (evt.type === 'touchstart') {
+        window.addEventListener('touchmove', onGlobalDrag, {passive: false});
+        window.addEventListener('touchend', onGlobalEnd);
+    } else {
+        window.addEventListener('mousemove', onGlobalDrag);
+        window.addEventListener('mouseup', onGlobalEnd);
+    }
     evt.stopPropagation();
 }
 
 function onLoopDragStart(evt) {
+    if(evt.type === 'touchstart') evt.preventDefault(); // Prevent scroll
+
     const line = evt.currentTarget;
     const key = line.getAttribute('data-key');
     const ids = key.split('-');
@@ -146,21 +164,32 @@ function onLoopDragStart(evt) {
     const pt = getScenePoint(evt);
     dragInfo.startMouse = pt;
     dragInfo.startObj = { x: loopOffsets[key], y: 0 };
-    window.addEventListener('mousemove', onGlobalDrag);
-    window.addEventListener('mouseup', onGlobalEnd);
+    
+    if (evt.type === 'touchstart') {
+        window.addEventListener('touchmove', onGlobalDrag, {passive: false});
+        window.addEventListener('touchend', onGlobalEnd);
+    } else {
+        window.addEventListener('mousemove', onGlobalDrag);
+        window.addEventListener('mouseup', onGlobalEnd);
+    }
     evt.stopPropagation();
 }
 
 function onGlobalDrag(evt) {
+    if(evt.type === 'touchmove') evt.preventDefault(); // Stop scrolling
+
+    const cur = getEvtLoc(evt);
+
     if (dragInfo.type === 'pan') {
-        const dx = evt.clientX - dragInfo.startMouse.x;
-        const dy = evt.clientY - dragInfo.startMouse.y;
+        const dx = cur.x - dragInfo.startMouse.x;
+        const dy = cur.y - dragInfo.startMouse.y;
         view.x = dragInfo.startView.x + dx;
         view.y = dragInfo.startView.y + dy;
         updateTransform();
     }
     else if (dragInfo.type === 'node' || dragInfo.type === 'hub') {
         const pt = getScenePoint(evt);
+        // Note: getScenePoint already uses getEvtLoc
         const dx = pt.x - dragInfo.startMouse.x;
         const dy = pt.y - dragInfo.startMouse.y;
         nodePos[dragInfo.id].x = dragInfo.startObj.x + dx;
@@ -169,16 +198,12 @@ function onGlobalDrag(evt) {
         if(el) el.setAttribute('transform', `translate(${nodePos[dragInfo.id].x},${nodePos[dragInfo.id].y})`);
         drawEdges(document.getElementById('edges'));
     }
-    else if (dragInfo.type === 'loop') {
-        const pt = getScenePoint(evt);
-        const dx = pt.x - dragInfo.startMouse.x;
-        loopOffsets[dragInfo.id] = dragInfo.startObj.x + dx;
-        drawEdges(document.getElementById('edges'));
-    }
 }
 
-function onGlobalEnd() {
+function onGlobalEnd(evt) {
     dragInfo.type = null;
     window.removeEventListener('mousemove', onGlobalDrag);
     window.removeEventListener('mouseup', onGlobalEnd);
+    window.removeEventListener('touchmove', onGlobalDrag);
+    window.removeEventListener('touchend', onGlobalEnd);
 }
