@@ -500,39 +500,55 @@ svg { width: 100%; height: 100%; display: block; }
     /* Flex Layout for Sticky Footer */
     display: flex;
     flex-direction: column;
-    /* Important: Limit height and respect viewport */
-    max-height: 90vh; /* Leave some breathing room */
+    
+    /* Critical: Use dvh for mobile browsers and leave space */
+    max-height: 85dvh; 
     height: auto;
+    
+    /* Ensure radius clips the footer */
+    overflow: hidden; 
 }
 
 .modal-header {
     flex-shrink: 0; /* Keep header fixed size */
     background: white;
-    padding: 24px 32px;
+    padding: 20px 24px; /* Slightly tighter on mobile */
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 16px 16px 0 0;
 }
 
 .modal-body {
     flex: 1; /* Take remaining space */
     overflow-y: auto; /* Scroll ONLY the body */
-    padding: 32px;
-    font-size: 1.05rem; 
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+    padding: 24px;
+    font-size: 1rem; 
     color: #374151; 
     line-height: 1.6;
 }
 
 .modal-footer {
     flex-shrink: 0; /* Keep footer fixed size */
-    padding: 20px 32px;
+    padding: 16px 24px;
     background: #f9fafb;
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: flex-end;
-    border-radius: 0 0 16px 16px;
+    /* Ensure it's always on top of scrollbars if any */
+    z-index: 10;
+}
+
+/* Specific Mobile Tweak */
+@media (max-width: 640px) {
+    .modal-content {
+        max-height: 80dvh; /* Even safer on small phones */
+        width: 92%;
+    }
+    .modal-body {
+        padding: 16px; /* Save space */
+    }
 }
 
 /* Parallel & Divergence Bars (Missing in previous version) */
