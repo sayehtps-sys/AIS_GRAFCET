@@ -21,9 +21,15 @@
             <option value="mix.json">04. Tank Mixing System</option>
             <option value="split.json">05. Sorting Conveyor</option>
         </select>
+        <button class="btn" onclick="showInfo()" style="display:flex; align-items:center; gap:5px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            INFO
+        </button>
     </div>  
-
-
 </header>
 
 <main id="main-viewer">
@@ -32,6 +38,11 @@
         <div class="panel-label">GRAFCET LOGIC</div>
         <div id="canvas-container" onwheel="onScroll(event)" onmousedown="onPanStart(event)" ontouchstart="onPanStart(event)">
             <svg id="svg"><g id="scene"></g></svg>
+        </div>
+        <!-- Floating Zoom Controls -->
+        <div class="zoom-controls-floating">
+            <button class="btn-zoom" onclick="zoom(0.2)">+</button>
+            <button class="btn-zoom" onclick="zoom(-0.2)">-</button>
         </div>
     </section>
 
@@ -43,6 +54,23 @@
         </div>
     </section>
 </main>
+
+<!-- Info Modal -->
+<div id="img-zoom-overlay" class="img-zoom-overlay" onclick="closeImgZoom()"></div>
+<div id="info-modal" class="modal-overlay" onclick="if(event.target === this) closeInfo()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-title" id="info-title">System Description</span>
+            <button class="modal-close" onclick="closeInfo()">&times;</button>
+        </div>
+        <div class="modal-body" id="info-body" onclick="handleImgClick(event)">
+            <!-- Content injected here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn-solution" onclick="closeInfo()">SHOW SOLUTION</button>
+        </div>
+    </div>
+</div>
 
 <!-- Hidden Textarea (Logic still reads from here, but user doesn't see it) -->
 <textarea id="code" style="display:none;"></textarea>
@@ -56,6 +84,135 @@
 <script src="twin.js"></script>
 
 <script>
+    // --- EXERCISE DESCRIPTIONS (Converted from LaTeX) ---
+    const descriptions = {
+        "car.json": `
+            <h3>Shuttle Cart System</h3>
+            <img src="fig1.png" alt="Shuttle Cart Diagram">
+            <p><strong>Functional Description:</strong><br>
+            A shuttle cart moves on a linear rail. The system rests at position <strong>A</strong>. When the cycle start button (<strong>dcy</strong>) is pressed, the cart executes the following sequence:</p>
+            <ol>
+                <li>Travel from Home (<strong>A</strong>) to the End (<strong>B</strong>).</li>
+                <li>Return to the Middle position (<strong>C</strong>).</li>
+                <li>Travel back to the End (<strong>B</strong>).</li>
+                <li>Return to Home (<strong>A</strong>) and stop.</li>
+            </ol>
+            <table class="io-table">
+                <tr><th>Sensors</th><th>Actuators</th></tr>
+                <tr><td><code>sens_a</code> : Pos A (Home)</td><td><code>Move_R</code> : Move Right</td></tr>
+                <tr><td><code>sens_b</code> : Pos B (End)</td><td><code>Move_L</code> : Move Left</td></tr>
+                <tr><td><code>sens_c</code> : Pos C (Mid)</td><td></td></tr>
+                <tr><td><code>dcy</code> : Start Button</td><td></td></tr>
+            </table>
+        `,
+        "twoCar.json": `
+            <h3>Synchronized Dual Carts</h3>
+            <img src="fig2.png" alt="Dual Cart Diagram">
+            <p><strong>Functional Description:</strong><br>
+            Two independent carts (Cart 1 & Cart 2) start at their respective home positions.</p>
+            <ul>
+                <li>Upon <strong>dcy</strong>, both carts start moving simultaneously.</li>
+                <li>Each cart performs a full round trip: Home → End → Home.</li>
+                <li><strong>Synchronization:</strong> A new cycle cannot begin until <em>both</em> carts have returned to their home positions.</li>
+            </ul>
+            <table class="io-table">
+                <tr><th>Sensors</th><th>Actuators</th></tr>
+                <tr><td><code>s_L1 / s_L2</code> : Home Sens</td><td><code>Move_R1 / R2</code> : Move Right</td></tr>
+                <tr><td><code>s_R1 / s_R2</code> : End Sens</td><td><code>Move_L1 / L2</code> : Move Left</td></tr>
+                <tr><td><code>dcy</code> : Global Start</td><td></td></tr>
+            </table>
+        `,
+        "bottle.json": `
+            <h3>Automatic Bottling Line</h3>
+            <img src="fig3.png" alt="Bottling Line Diagram">
+            <p><strong>Functional Description:</strong><br>
+            An indexing conveyor belt moves bottles step-by-step through two workstations.</p>
+            <ol>
+                <li><strong>Conveyor:</strong> Advances one step (<code>MF</code>) only when both stations are idle.</li>
+                <li><strong>Station 1 (Filling):</strong> If bottle present (<code>bf</code>), fill (<code>V</code>) until full (<code>fd</code>).</li>
+                <li><strong>Station 2 (Capping):</strong> If bottle present (<code>bc</code>), cap (<code>C</code>) until done (<code>cd</code>).</li>
+            </ol>
+            <p>Bottles are spaced exactly one step apart. Empty spots may occur.</p>
+            <table class="io-table">
+                <tr><th>Sensors</th><th>Actuators</th></tr>
+                <tr><td><code>bf / bc</code> : Bottle Present</td><td><code>MF</code> : Conveyor Motor</td></tr>
+                <tr><td><code>nbf / nbc</code> : Bottle Absent</td><td><code>V</code> : Fill Valve</td></tr>
+                <tr><td><code>fd / cd</code> : Operation Done</td><td><code>C</code> : Capping Cyl</td></tr>
+                <tr><td><code>md</code> : Step Done</td><td></td></tr>
+            </table>
+        `,
+        "mix.json": `
+            <h3>Industrial Mixing Tank</h3>
+            <img src="fig4.png" alt="Mixing Tank Diagram">
+            <p><strong>Functional Description:</strong><br>
+            A batch processing system for chemical mixing.</p>
+            <ul>
+                <li><strong>Start:</strong> Press <strong>Dcy</strong>.</li>
+                <li><strong>Step 1:</strong> Open <code>EV1</code> to fill Tank A to weight <code>P1</code>.</li>
+                <li><strong>Step 2:</strong> Close <code>EV1</code>. Open <code>EV2</code> to transfer to Tank B until Tank A is empty (<code>P0</code>).</li>
+                <li><strong>Step 3:</strong> Activate Heater (<code>RC</code>) and Mixer (<code>MB</code>) until Temp ≥ θ₀.</li>
+                <li><strong>Step 4:</strong> Drain Tank B via <code>EV3</code> for 20 seconds.</li>
+            </ul>
+            <table class="io-table">
+                <tr><th>Sensors</th><th>Actuators</th></tr>
+                <tr><td><code>P1 / P0</code> : Weight High/Low</td><td><code>EV1 / EV2</code> : Inlet/Transfer</td></tr>
+                <tr><td><code>θ0</code> : Temp Reached</td><td><code>RC / MB</code> : Heater/Mixer</td></tr>
+                <tr><td><code>Timer_Done</code> : 20s Elapsed</td><td><code>EV3</code> : Drain Valve</td></tr>
+            </table>
+        `,
+        "split.json": `
+            <h3>Sorting Conveyor</h3>
+            <img src="fig5.png" alt="Sorting Conveyor Diagram">
+            <p><strong>Functional Description:</strong><br>
+            A conveyor sorts parts by shape while system is active (<strong>m=1</strong>).</p>
+            <ul>
+                <li><strong>Pyramid (<code>t</code>):</strong> Pusher 1 extends (<code>A+</code>) to push part to Bin 1. Retracts (<code>A-</code>) when done.</li>
+                <li><strong>Prism (<code>p</code>):</strong> Pusher 2 retracts (<code>B-</code>) to open trapdoor for Bin 2. Extends (<code>B+</code>) after part drops (<code>b2</code>).</li>
+            </ul>
+            <table class="io-table">
+                <tr><th>Sensors</th><th>Actuators</th></tr>
+                <tr><td><code>t / p</code> : Detect Shape</td><td><code>A+ / A-</code> : Pusher 1</td></tr>
+                <tr><td><code>a0 / a1</code> : Cyl A Pos</td><td><code>B+ / B-</code> : Pusher 2</td></tr>
+                <tr><td><code>b0 / b1</code> : Cyl B Pos</td><td><code>m</code> : System On</td></tr>
+                <tr><td><code>b2</code> : Part Dropped</td><td></td></tr>
+            </table>
+        `
+    };
+
+    function showInfo() {
+        const file = document.getElementById('system-select').value;
+        const content = descriptions[file] || "<p>No description available for this system.</p>";
+        document.getElementById('info-body').innerHTML = content;
+        document.getElementById('info-modal').style.display = 'flex';
+    }
+
+    // Image Zoom Logic
+    let zoomedImg = null;
+    function handleImgClick(e) {
+        if (e.target.tagName === 'IMG') {
+            if (e.target.classList.contains('img-zoomed')) {
+                closeImgZoom();
+            } else {
+                zoomedImg = e.target;
+                zoomedImg.classList.add('img-zoomed');
+                document.getElementById('img-zoom-overlay').classList.add('active');
+            }
+        }
+    }
+
+    function closeImgZoom() {
+        if (zoomedImg) {
+            zoomedImg.classList.remove('img-zoomed');
+            zoomedImg = null;
+        }
+        document.getElementById('img-zoom-overlay').classList.remove('active');
+    }
+
+    function closeInfo() {
+        document.getElementById('info-modal').style.display = 'none';
+        startSim(); // Start simulation when solution is shown
+    }
+
     // Logic to fetch and load JSON files
     async function loadSelectedSystem() {
         const file = document.getElementById('system-select').value;
@@ -66,7 +223,7 @@
             // 1. Set the code in the hidden textarea so core.js can render it
             document.getElementById('code').value = data.grafcet;
             
-            // 2. Use the existing loader from twin.js
+            // 2. Use existing loader
             loadSystem(JSON.stringify(data));
             
             // 3. Reset Simulation state
@@ -75,7 +232,8 @@
             // 4. Auto-center the Grafcet view
             setTimeout(() => {
                 resetView();
-                startSim(); // Auto-start the simulation
+                // startSim(); // Deferred until 'Show Solution'
+                showInfo(); // Auto-open Exercise Info
             }, 100);
             
         } catch (error) {

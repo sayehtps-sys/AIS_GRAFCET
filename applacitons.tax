@@ -1,0 +1,217 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+
+% --- Professional Fonts & Colors ---
+\usepackage{mathpazo} % Palatino font (very professional for engineering)
+\usepackage{xcolor}
+\definecolor{RoyalBlue}{RGB}{0, 80, 160}
+\definecolor{DarkGrey}{RGB}{50, 50, 50}
+
+% --- Page Layout ---
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs} % For professional tables
+\usepackage{array}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+
+% --- Section Styling ---
+\titleformat{\section}
+{\color{RoyalBlue}\Large\bfseries}
+{\thesection.}{0.5em}{}[\titlerule]
+
+% --- Header & Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textbf{Automation of Industrial Systems (M1-CM)}}
+\rhead{Dr. K. F. Sayeh $\cdot$ 2025/2026}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{1pt}
+
+% --- Custom Command for I/O Tables ---
+\newcommand{\iotable}[1]{
+    \begin{center}
+    \small
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{0.95\textwidth}{@{} l X l X @{}}
+        \toprule
+        \textbf{Sensors (Inputs)} & \textbf{Description} & \textbf{Actuators (Outputs)} & \textbf{Description} \\
+        \midrule
+        #1
+        \bottomrule
+    \end{tabularx}
+    \end{center}
+}
+
+\begin{document}
+
+% --- TITLE BLOCK ---
+\begin{center}
+    \vspace*{0.5cm}
+    {\huge \textbf{\color{DarkGrey} Tutorial 02}} \\[0.3cm]
+    {\Large \textbf{\color{RoyalBlue} GRAFCET Control Design}} \\[0.5cm]
+    \textit{Objective: Design the Level 2 GRAFCET for the following Digital Twins.}
+    \vspace{0.8cm}
+\end{center}
+
+% =========================================================
+% EXERCISE 01
+% =========================================================
+\section{Shuttle Cart System}
+
+\begin{minipage}{0.55\textwidth}
+    \textbf{Functional Description:} \\
+    A shuttle cart moves on a linear rail. The system rests at position \textbf{A}. When the cycle start button (\textbf{dcy}) is pressed, the cart executes the following sequence:
+    \begin{enumerate}[label=\arabic*.]
+        \item Travel from Home (\textbf{A}) to the End (\textbf{B}).
+        \item Return to the Middle position (\textbf{C}).
+        \item Travel back to the End (\textbf{B}).
+        \item Return to Home (\textbf{A}) and stop.
+    \end{enumerate}
+\end{minipage}
+\hfill
+\begin{minipage}{0.40\textwidth}
+    \centering
+    % Ensure you have fig1.png in your folder
+    \includegraphics[width=\linewidth]{fig1.png}
+    \captionof{figure}{Shuttle Rail System}
+\end{minipage}
+
+\vspace{0.2cm}
+\iotable{
+    \texttt{sens\_a} & Sensor at Position A (Home) & \texttt{Move\_R} & Motor Move Right \\
+    \texttt{sens\_b} & Sensor at Position B (End)  & \texttt{Move\_L} & Motor Move Left \\
+    \texttt{sens\_c} & Sensor at Position C (Mid)  & & \\
+    \texttt{dcy}    & Cycle Start Button          & & \\
+}
+
+\vspace{0.5cm}
+
+% =========================================================
+% EXERCISE 02
+% =========================================================
+\section{Synchronized Dual Carts}
+
+\begin{minipage}{0.55\textwidth}
+    \textbf{Functional Description:} \\
+    Two independent carts (Cart 1 \& Cart 2) start at their respective home positions.
+    \begin{itemize}[leftmargin=*]
+        \item Upon \textbf{dcy}, both carts start moving simultaneously.
+        \item Each cart performs a full round trip: Home $\to$ End $\to$ Home.
+        \item \textbf{Synchronization:} A new cycle cannot begin until \textit{both} carts have returned to their home positions.
+    \end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.40\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{fig2.png}
+    \captionof{figure}{Dual Cart Setup}
+\end{minipage}
+
+\vspace{0.2cm}
+\iotable{
+    \texttt{s\_L1} / \texttt{s\_L2} & Left (Home) Sensors & \texttt{Move\_R1} / \texttt{Move\_R2} & Move Right (1 \& 2) \\
+    \texttt{s\_R1} / \texttt{s\_R2} & Right (End) Sensors & \texttt{Move\_L1} / \texttt{Move\_L2} & Move Left (1 \& 2) \\
+    \texttt{dcy} & Global Start & & \\
+}
+
+\newpage
+
+% =========================================================
+% EXERCISE 03
+% =========================================================
+\section{Automatic Bottling Line}
+
+\begin{minipage}{0.55\textwidth}
+    \textbf{Functional Description:} \\
+    An indexing conveyor belt moves bottles step-by-step through two workstations.
+    \begin{enumerate}[label=\arabic*.]
+        \item \textbf{Conveyor:} Advances one step (\texttt{MF}) only when both stations are idle.
+        \item \textbf{Station 1 (Filling):} If a bottle is present (\texttt{bf}), fill it (\texttt{V}) until full (\texttt{fd}).
+        \item \textbf{Station 2 (Capping):} If a bottle is present (\texttt{bc}), cap it (\texttt{C}) until done (\texttt{cd}).
+    \end{enumerate}
+    Bottles are spaced exactly one step apart. Empty spots may occur.
+\end{minipage}
+\hfill
+\begin{minipage}{0.40\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{fig3.png}
+    \captionof{figure}{Bottling Process}
+\end{minipage}
+
+\vspace{0.2cm}
+\iotable{
+    \texttt{bf} / \texttt{bc} & Bottle Present (Fill/Cap) & \texttt{MF} & Conveyor Motor \\
+    \texttt{nbf} / \texttt{nbc} & Bottle Absent (Fill/Cap) & \texttt{V} & Fill Valve \\
+    \texttt{fd} / \texttt{cd} & Operation Done (Fill/Cap) & \texttt{C} & Capping Cylinder \\
+    \texttt{md} & Movement Done (Step complete) & & \\
+}
+
+\vspace{0.5cm}
+
+% =========================================================
+% EXERCISE 04
+% =========================================================
+\section{Industrial Mixing Tank}
+
+\begin{minipage}{0.55\textwidth}
+    \textbf{Functional Description:} \\
+    A batch processing system for chemical mixing.
+    \begin{itemize}[leftmargin=*]
+        \item \textbf{Start:} Press \textbf{Dcy}.
+        \item \textbf{Step 1:} Open \texttt{EV1} to fill Tank A to weight \texttt{P1}.
+        \item \textbf{Step 2:} Close \texttt{EV1}. Open \texttt{EV2} to transfer liquid to Tank B until Tank A is empty (\texttt{P0}).
+        \item \textbf{Step 3:} Activate Heater (\texttt{RC}) and Mixer (\texttt{MB}) until Temp $\ge \theta_0$.
+        \item \textbf{Step 4:} Drain Tank B via \texttt{EV3} for 20 seconds.
+    \end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.40\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{fig4.png}
+    \captionof{figure}{Mixing System}
+\end{minipage}
+
+\vspace{0.2cm}
+\iotable{
+    \texttt{P1} / \texttt{P0} & Weight High / Low & \texttt{EV1} / \texttt{EV2} & Inlet / Transfer Valves \\
+    \texttt{$\theta_0$} & Temperature Reached & \texttt{RC} / \texttt{MB} & Heater / Mixer \\
+    \texttt{Timer\_Done} & 20s Elapsed & \texttt{EV3} & Drain Valve \\
+}
+
+\vspace{0.5cm}
+
+% =========================================================
+% EXERCISE 05
+% =========================================================
+\section{Sorting Conveyor}
+
+\begin{minipage}{0.55\textwidth}
+    \textbf{Functional Description:} \\
+    A conveyor sorts parts by shape while system is active (\textbf{m=1}).
+    \begin{itemize}[leftmargin=*]
+        \item \textbf{Pyramid (\texttt{t}):} Pusher 1 extends (\texttt{A+}) to push part to Bin 1. Retracts (\texttt{A-}) when done.
+        \item \textbf{Prism (\texttt{p}):} Pusher 2 retracts (\texttt{B-}) to open the trapdoor for Bin 2. Extends (\texttt{B+}) after part falls (\texttt{b2}).
+    \end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.40\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{fig5.png}
+    \captionof{figure}{Sorting Mechanism}
+\end{minipage}
+
+\vspace{0.2cm}
+\iotable{
+    \texttt{t} / \texttt{p} & Detect Pyramid / Prism & \texttt{A+} / \texttt{A-} & Pusher 1 Fwd/Rev \\
+    \texttt{a0} / \texttt{a1} & Cyl A Retracted / Extended & \texttt{B+} / \texttt{B-} & Pusher 2 Fwd/Rev \\
+    \texttt{b0} / \texttt{b1} & Cyl B Retracted / Extended & \texttt{m} & System On/Off \\
+    \texttt{b2} & Part Dropped in Bin 2 & & \\
+}
+
+\end{document}
